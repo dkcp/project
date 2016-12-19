@@ -1,104 +1,66 @@
 #include <stdarg.h>
-#include <elf.h>
+#include <stdio.h>
 
-#define HEXA_MIN "0123456789abcdef"
-#define HEXA_CAP "0123456789ABCDEF"
-
-void my_putchar(char c)
+void my_printf_char(char c)
 {
-  write(1, &c, 1);
+	//문자 출력
+	printf("%c", c);
 }
 
-void my_putstr(char *str)
+void my_printf_str(char *str)
 {
-  int i;
-
-  if (str)
-    for (i = 0; str[i]; i++)
-      my_putchar(str[i]);
-  else
-    my_putstr("(null)");
+	//문자열 출력
 }
 
-void my_put_hexa(unsigned int nb, char *base)
+void my_printf_hexa(unsigned int nb, char *base)
 {
-  unsigned int beg;
-  unsigned int end;
-
-  end = nb % 16;
-  beg = (nb - end) / 16;
-  if (beg)
-    my_put_hexa(beg, base);
-  my_putchar(base[end]);
+	//16진수 출력
 }
 
-void my_put_nbr(int nb)
+void my_printf_int(int nb)
 {
-  int beg;
-  int end;
-
-  end = nb % 10;
-  beg = (nb - end) / 10;
-  if (beg)
-    my_put_nbr(beg);
-  my_putchar('0' + end);
+	//10진수 출력
 }
 
-void my_put_unbr(uint32_t nb)
+void my_printf_uint(unsigned int nb)
 {
-  uint32_t diviz;
-
-  if ((int)nb == -1)
-    my_putstr("4294967295");
-  else
-    {
-      diviz = 1;
-      while ((diviz * 10) < nb)
-        diviz *= 10;
-      while (diviz)
-        {
-          my_putchar((char)((int)'0' + (int)(nb / diviz)));
-          nb -= ((nb / diviz) * diviz);
-          diviz /= 10;
-        }
-    }
+	//unsigned int 출력
 }
 
-void my_printf(char *all, ...)
+void my_printf(char *str, ...)			//첫번째 인자는 문자열, 그 이후 인자는 가변인자
 {
-  va_list args;
-  int i;
+	va_list va;								//가변인자 리스트
+	int i=0;									//반복
 
-  va_start(args, all);
-  i = 0;
-  while (all[i])
-    {
-      if (all[i] == '%')
-        {
-          if (all[i + 1] == 's')
-            my_putstr(va_arg(args, char *));
-          else if (all[i + 1] == 'd' || all[i + 1] == 'i')
-            my_put_nbr(va_arg(args, int));
-          else if (all[i + 1] == 'c')
-            my_putchar((char)va_arg(args, int));
-          else if (all[i + 1] == 'x' || all[i + 1] == 'X')
-            my_put_hexa(va_arg(args, unsigned int), (all[i + 1] == 'x' ? HEXA_MIN : HEXA_CAP));
-          else if (all[i + 1] == 'u')
-            my_put_unbr(va_arg(args, unsigned int));
-          else
-            my_putchar(all[i + 1]);
-          i++;
-        }
-      else
-        my_putchar(all[i]);
-      i++;
-    }
-  va_end(args);
+	va_start(va, str);						//가변인자 준비
+	while (str[i])							//문자열 순회
+	{
+		if (str[i] == '%')					//문자열 내 서식문자
+		{
+			if (str[i + 1] == 's')									//%s
+				my_printf_str(va_arg(va, char *));						//String문자열 출력
+			else if (str[i + 1] == 'd' || str[i + 1] == 'i')			//%d or %i
+				my_printf_int(va_arg(va, int));							//10진수 int형 출력
+			else if (str[i + 1] == 'c')								//%c
+				my_printf_char((char)va_arg(va, int));					//char 문자형 출력
+			else if (str[i + 1] == 'x' || str[i + 1] == 'X')			//%x or %X	16진수 int형 출력
+				my_printf_hexa(va_arg(va, unsigned int), (str[i + 1] == 'x' ? HEXA_MIN : HEXA_CAP));
+			else if (str[i + 1] == 'u')								//%u
+				my_printf_uint(va_arg(va, unsigned int));				//unsigned int형 출력
+			else
+				my_printf_char(str[i + 1]);			//
+			i++;
+	  }
+	  else
+		  my_printf_char(str[i]);
+	  i++;
+  }
+  va_end(va);
 }
 
 int main(void)
 {
-  my_printf("%s %d %i %c %x %X %u test\n", "test", 1, 2, 'c', 42, 42, 12887238732);
-  my_printf("test %d %d %d %d\n", 64, 128, 512, 1024);
-  return (0);
+	printf("printf : %d\n", 1);
+	my_printf("my_printf : %d\n", 1);
+	return (0);
 }
